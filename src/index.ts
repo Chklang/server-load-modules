@@ -17,7 +17,7 @@ export function loadModules(params: ILoadParams): Promise<void> {
         return Promise.resolve(e);
     });
 
-    params.arbitraryAdd.forEach(e => autoload.default(path.resolve(params.basePath, e)));
+    params.arbitraryAdd.forEach(e => autoload.default(e));
 
     // Get node_module folders
     const nodeModuleFolders: string[] = [];
@@ -39,14 +39,17 @@ export function loadModules(params: ILoadParams): Promise<void> {
         }
     }
 
-    // Extract all projects with key 'ocastcontroller' into package.json
+    // Extract all projects
     return Promise.resolve().then(() => {
         const promises: Promise<void>[] = [];
         nodeModuleFolders.forEach((nodeModuleFolder: string) => {
             promises.push(checkFolder(params, nodeModuleFolder));
         });
         return Promise.all(promises);
-    }).then(() => { });
+    }).then(() => {
+        // Check current project
+        checkProject(params, params.basePath);
+    });
 }
 
 function checkFolder(params: ILoadParams, root: string): Promise<void> {
@@ -56,33 +59,39 @@ function checkFolder(params: ILoadParams, root: string): Promise<void> {
             if (folder.startsWith('@')) {
                 promises.push(checkFolder(params, root + path.sep + folder));
             } else {
-                const filePath: string = root + path.sep + folder + path.sep + params.baseFile;
-                if (fs.existsSync(filePath)) {
-                    const fileContent: any = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-                    let isOk: boolean = params.propertyDetection.length === 0;
-                    let subContent: any = fileContent;
-                    if (!isOk) {
-                        isOk = true;
-                        for (let currentIndex: number = 0; isOk && currentIndex < params.propertyDetection.length; currentIndex++) {
-                            if (!subContent[params.propertyDetection[currentIndex]]) {
-                                isOk = false;
-                            }
-                            subContent = subContent[params.propertyDetection[currentIndex]];
-                        }
-                    }
-                    if (isOk) {
-                        LOGGER.info('Project %1/%2 found as module', root, folder);
-                        promises.push(params.onDetection(subContent, root + path.sep + folder, fileContent).then((contents: string[]) => {
-                            contents.forEach((content) => {
-                                autoload.default(root + path.sep + folder + path.sep + content);
-                            });
-                        }));
-                    }
-                }
+                checkProject(params, root + path.sep + folder);
             }
         });
         return Promise.all(promises).then(() => { return; });
     });
+}
+
+function checkProject(params: ILoadParams, root: string): Promise<void> {
+    const promises: Promise<void>[] = [];
+    const filePath: string = root + path.sep + params.baseFile;
+    if (fs.existsSync(filePath)) {
+        const fileContent: any = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        let isOk: boolean = params.propertyDetection.length === 0;
+        let subContent: any = fileContent;
+        if (!isOk) {
+            isOk = true;
+            for (let currentIndex: number = 0; isOk && currentIndex < params.propertyDetection.length; currentIndex++) {
+                if (!subContent[params.propertyDetection[currentIndex]]) {
+                    isOk = false;
+                }
+                subContent = subContent[params.propertyDetection[currentIndex]];
+            }
+        }
+        if (isOk) {
+            LOGGER.info('Project %1 found as module', root);
+            promises.push(params.onDetection(subContent, root, fileContent).then((contents: string[]) => {
+                contents.forEach((content) => {
+                    autoload.default(root + path.sep + content);
+                });
+            }));
+        }
+    }
+    return Promise.all(promises).then(() => { return; });
 }
 
 export interface ILoadParams {
