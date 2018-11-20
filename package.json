@@ -1,0 +1,38 @@
+{
+  "name": "server-load-modules",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "scripts": {
+    "build": "tsc",
+    "copy:rootfiles": "copyfiles package.json bin/** README.md .npmrc dist/",
+    "dist": "npm run lint && npm run test && npm run build && npm run copy:rootfiles",
+    "start": "node dist/index.js",
+    "test": "node node_modules/mocha/bin/mocha -r ts-node/register test/**/*.spec.ts",
+    "lint": "tslint -c tslint.json \"src/**/*.ts\"",
+    "clean_dist": "rm -Rf dist",
+    "publisher": "cd dist && npm publish",
+    "set_version": "node node_modules/produce-version --git-publish false"
+  },
+  "author": "Delphin Germa",
+  "license": "WTFPL",
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/fs-extra": "^5.0.4",
+    "@types/mocha": "^5.2.5",
+    "chai": "^4.2.0",
+    "codelyzer": "^4.5.0",
+    "copyfiles": "^2.1.0",
+    "mocha": "^5.2.0",
+    "produce-version": "^1.0.4",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^3.1.6"
+  },
+  "dependencies": {
+    "@log4js-universal/logger": "^1.0.5",
+    "arrayplus": "^1.0.3",
+    "auto-load": "^3.0.4",
+    "fs-extra": "^7.0.1"
+  }
+}
