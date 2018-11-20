@@ -17,11 +17,11 @@ export function loadModules(params: ILoadParams): Promise<void> {
         return Promise.resolve(e);
     });
 
-    params.arbitraryAdd.forEach(e => autoload.default(path.relative(params.basePath, e)));
+    params.arbitraryAdd.forEach(e => autoload.default(path.resolve(params.basePath, e)));
 
     // Get node_module folders
     const nodeModuleFolders: string[] = [];
-    const folder = path.relative(params.basePath, './node_modules');
+    const folder = path.resolve(params.basePath, './node_modules');
     if (fs.existsSync(folder)) {
         nodeModuleFolders.push(folder);
     }
