@@ -1,6 +1,6 @@
 {
   "name": "server-load-modules",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Load modules",
   "main": "./lib/index.js",
   "scripts": {
@@ -43,7 +43,7 @@
     "typescript": "^3.1.6"
   },
   "dependencies": {
-    "@log4js-universal/logger": "^1.0.5",
+    "@log4js-universal/logger": "^1.0.6",
     "arrayplus": "^1.0.3",
     "auto-load": "^3.0.4",
     "fs-extra": "^7.0.1"
