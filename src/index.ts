@@ -35,7 +35,12 @@ export function loadModules(params: ILoadParams): Promise<void> {
                 LOGGER.info('Cannot execute npm root -g');
             }
         } else {
-            nodeModuleFolders.push(result.stdout.toString().trim());
+            const pathToAdd = result.stdout.toString().trim();
+            if (pathToAdd) {
+                nodeModuleFolders.push(pathToAdd);
+            } else if (params.global === EGlobal.REQUIRED) {
+                return Promise.reject(new Error('Cannot get root npm folder'));
+            }
         }
     }
 
